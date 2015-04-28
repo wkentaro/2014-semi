@@ -16,4 +16,6 @@
     (setq avs (append avs (place-object-avs arm)))
     (send *ri* :angle-vector-sequence avs :fast :default-controller 0 :scale 2.2)
     (send *ri* :wait-interpolation)
+    (send *ri* :stop-grasp)
+    (unix::sleep 3)
     avs))
