@@ -31,7 +31,7 @@
    object-id_
    object-list_
    save_service_client_
-   grasping-log-filename_
+   ; grasping-log-filename_
    )
   )
 
@@ -46,10 +46,10 @@
       (jsk_2016_01_baxter_apc::baxter-init :ctype :larm-controller)
       (jsk_2016_01_baxter_apc::baxter-init :ctype :rarm-controller))
     ;; Initialize grasping log file
-    (setq grasping-log-filename_ (pathname (ros::get-param "~grasping_log_filename")))
-    (with-open-file
-      (f grasping-log-filename_ :direction :output :if-exists :append :if-does-not-exist :create)
-      (format f "timestamp,object_name,grasp_success~%"))
+    ; (setq grasping-log-filename_ (pathname (ros::get-param "~grasping_log_filename")))
+    ; (with-open-file
+    ;   (f grasping-log-filename_ :direction :output :if-exists :append :if-does-not-exist :create)
+    ;   (format f "timestamp,object_name,grasp_success~%"))
     (setq *robot* *baxter*)
     ;; Set slots
     (setq object-id_ 0)
@@ -168,7 +168,7 @@
       )
     (if (send *ri* :graspingp arm_)
       (progn
-        (send self :write-grasping-log :success t)
+        ; (send self :write-grasping-log :success t)
         (send *ri* :angle-vector
               (send *baxter* :fold-to-keep-object arm_)
               3000)
@@ -176,25 +176,25 @@
         (send *ri* :gripper-servo-on arm_)
         t)
       (progn
-        (send self :write-grasping-log :success nil)
+        ; (send self :write-grasping-log :success nil)
         (send *ri* :stop-grasp arm_)
         (unix::sleep 5)
         nil)
       )
     )
-  (:write-grasping-log
-    (&key (success))
-    ;; ex)
-    ;; timestamp,object_name,grasp_success
-    ;; 14XXXX.XXXXX,oreo_mega_stuf,1
-    ;; 14XXXX.XXXXX,oreo_mega_stuf,0
-    (with-open-file (f grasping-log-filename_ :direction :output :if-exists :append)
-      (format f "~a,~a,~a~%"
-              (send (ros::time-now) :to-nsec)
-              (elt object-list_ object-id_)
-              (if success 1 0))
-      )
-    )
+  ; (:write-grasping-log
+  ;   (&key (success))
+  ;   ;; ex)
+  ;   ;; timestamp,object_name,grasp_success
+  ;   ;; 14XXXX.XXXXX,oreo_mega_stuf,1
+  ;   ;; 14XXXX.XXXXX,oreo_mega_stuf,0
+  ;   (with-open-file (f grasping-log-filename_ :direction :output :if-exists :append)
+  ;     (format f "~a,~a,~a~%"
+  ;             (send (ros::time-now) :to-nsec)
+  ;             (elt object-list_ object-id_)
+  ;             (if success 1 0))
+  ;     )
+  ;   )
   (:detect-table-center
     ()
     (send self :move-arm-to-view-table)
