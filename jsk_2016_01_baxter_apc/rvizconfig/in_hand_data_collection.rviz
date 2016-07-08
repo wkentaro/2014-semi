@@ -328,7 +328,7 @@ Visualization Manager:
       Foreground Alpha: 0.8
       Foreground Color: 25; 255; 240
       Name: MainState
-      Overtake Color Properties: false
+      Overtake Color Properties: true
       Overtake Position Properties: true
       Topic: /rosconsole_overlay_text/output
       Value: true
@@ -536,15 +536,15 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.777388
-        Y: 0.239722
-        Z: 0.0988758
+        X: 0.986696
+        Y: 0.280298
+        Z: -0.0898671
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.795398
+      Pitch: 0.800398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.59858
+      Yaw: 0.61358
     Saved: ~
 Window Geometry:
   Displays:
