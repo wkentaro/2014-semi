@@ -249,7 +249,11 @@
         (ros::ros-warn "[~a] Failed to pick object from table. Retrying.." (ros::get-name))
         (unix::sleep 3)
          )
-      (unix::system (format nil "rosrun dynamic_reconfigure dynparam set_from_parameters data_collection_server_~a _save_dir:='~/.ros/jsk_2016_01_baxter_apc/in_hand_data_collection/picked_~a" (arm-to-str arm_) (send (ros::time-now) :to-nsec)))
+      (ros::set-dynparam
+        (format nil "data_collection_server_~a" (arm-to-str arm_))
+        (list
+          (cons "save_dir"
+                (format nil "~a/.ros/jsk_2016_01_baxter_apc/in_hand_data_collection/~a_attempt" (unix::getenv "HOME") (send (ros::time-now) :to-nsec)))))
       (unix::sleep 2)
       ;; View hand in a static position at first
       (if (eq arm_ :larm)
