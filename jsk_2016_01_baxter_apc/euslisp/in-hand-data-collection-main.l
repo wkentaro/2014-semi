@@ -322,11 +322,12 @@
   (:mainloop
     ()
     ;; reset-pose
-    (send *ri* :angle-vector
-          (send *baxter* :reset-pose arm_)
-          5000)
+    (send *ri* :gripper-servo-on arm_)
+    (send *baxter* :fold-pose-back arm_)
+    (send *baxter* :rotate-gripper arm_ 90 :relative nil)
+    (send *ri* :angle-vector (send *baxter* :angle-vector) 5000)
     (send *ri* :wait-interpolation)
-    (send *ri* :calib-pressure-threshold)
+    (send *ri* :calib-pressure-threshold arm_)
     (while
       (ros::ok)
       ;; Show next object
@@ -335,7 +336,7 @@
       (send self :collect-data-for-an-object)
       ;; Prepare for next object
       (send *ri* :angle-vector
-            (send *baxter* :reset-pose arm_)
+            (send *baxter* :fold-pose-back arm_)
             5000)
       (send *ri* :wait-interpolation)
       (incf object-id_)
