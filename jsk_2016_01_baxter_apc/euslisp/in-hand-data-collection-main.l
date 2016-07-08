@@ -62,7 +62,7 @@
     )
   (:wait-for-user-input
     ()
-    (ros::ros-info "[~a] Waiting for user input to start" (ros::get-name))
+    (ros::ros-info-blue "[~a] Waiting for user input to start" (ros::get-name))
     (let (yes)
       (while
         (not yes)
@@ -72,7 +72,7 @@
     )
   (:send-save-request
     ()
-    (ros::ros-info "[~a] Sending save request to data saving server" (ros::get-name))
+    (ros::ros-info-blue "[~a] Sending save request to data saving server" (ros::get-name))
     (let ((req (instance std_srvs::TriggerRequest :init)))
       (while
         (not
@@ -138,7 +138,7 @@
       ))
   (:pick-object-from-table
     ()
-    (ros::ros-info "[~a] Picking object from table" (ros::get-name))
+    (ros::ros-info-blue "[~a] Picking object from table" (ros::get-name))
     (let ((av0) (av1) (centroid (send self :detect-object-on-table)))
       (send *ri* :gripper-servo-on arm_)
       (setq av0 (send *baxter* arm_
@@ -222,7 +222,7 @@
       ))
   (:place-object-on-table
     ()
-    (ros::ros-info "[~a] Placing object on table" (ros::get-name))
+    (ros::ros-info-blue "[~a] Placing object on table" (ros::get-name))
     (send *ri* :gripper-servo-on arm_)
     (let (av0)
       (setq av0
@@ -241,7 +241,7 @@
     )
   (:collect-data-for-an-object
     ()
-    (ros::ros-info "[~a] Collecting data for an object" (ros::get-name))
+    (ros::ros-info-blue "[~a] Collecting data for an object" (ros::get-name))
     (dotimes (_ 4)
       ;; Pick object from table
       (while
@@ -289,7 +289,7 @@
   (:request-next-object
     ()
     (let ((object-name (elt object-list_ object-id_)))
-      (ros::ros-info "[~a] Requesting next object: '~a'" (ros::get-name) object-name)
+      (ros::ros-info-blue "[~a] Requesting next object: '~a'" (ros::get-name) object-name)
       (ros::set-param "~object_label" object-name)
       (ros::set-dynparam
         (format nil "~a_image_publisher" (arm-to-str arm_))
