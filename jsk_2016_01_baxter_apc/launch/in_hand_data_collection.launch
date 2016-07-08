@@ -93,6 +93,15 @@
   <node name="rqt_yn_btn"
         pkg="jsk_rqt_plugins" type="rqt_yn_btn">
   </node>
+  <node name="image_rotate"
+        pkg="image_rotate" type="image_rotate">
+    <remap from="image" to="/kinect2_torso/hd/image_color" />
+    <remap from="rotated/image" to="/kinect2_torso/hd/image_color_rotated" />
+    <rosparam>
+      target_frame_id: base
+      source_frame_id: kinect2_torso_rgb_optical_frame
+    </rosparam>
+  </node>
   <node name="rviz"
         pkg="rviz" type="rviz"
         args="-d $(find jsk_2016_01_baxter_apc)/rvizconfig/in_hand_data_collection.rviz" />
