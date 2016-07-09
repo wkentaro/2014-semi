@@ -31,7 +31,7 @@
   <node name="apply_mask_in_hand_region_mask_$(arg HAND)"
         pkg="nodelet" type="nodelet"
         args="standalone jsk_perception/ApplyMaskImage $(arg MANAGER)">
-    <remap from="~input" to="closing_$(arg HAND)_hand/output" />
+    <remap from="~input" to="bounding_object_mask_$(arg HAND)_hand/output" />
     <remap from="~input/mask" to="bounding_rect_mask_in_hand_region_$(arg HAND)/output" />
   </node>
 
