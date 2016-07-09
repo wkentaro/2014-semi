@@ -131,13 +131,13 @@
             )
           )
         )
-      )
-    (if av
-      (progn
-        (send *ri* :angle-vector av 3000)
-        (send *ri* :wait-interpolation)
+      (if av
+        (progn
+          (send *ri* :angle-vector av 3000)
+          (send *ri* :wait-interpolation)
+          )
+        (return-from :go-view-hand-pose nil)
         )
-      (return-from :go-view-hand-pose nil)
       )
     (unix::sleep 1)
     )
@@ -145,13 +145,13 @@
     ()
     (if (eq arm_ :larm)
       (send *baxter* :larm :angle-vector
-            #f(9.25049 42.3633 -132.869 125.244 140.471 107.71 -19.1602 0.0))
+            #f(9.25049 42.3633 -132.869 125.244 140.471 107.71 -19.1602 90.0))
       (send *baxter* :rarm :angle-vector
-            #f(-9.25049 42.3633 132.869 125.244 -140.471 107.71 19.1602 0.0))
+            #f(-9.25049 42.3633 132.869 125.244 -140.471 107.71 19.1602 90.0))
       )
-    (let ((random-x 20)
-          (random-y 20)
-          (random-z 20))
+    (let ((random-x 100)
+          (random-y 100)
+          (random-z 100))
       (send *baxter* arm_ :move-end-pos
             (float-vector (random random-x) (random random-y) (random random-z))
             :local
@@ -271,13 +271,19 @@
     ()
     (ros::ros-info-blue "[~a] Placing object on table" (ros::get-name))
     (send *ri* :gripper-servo-on arm_)
-    (let (av0)
+    (let ((av0)
+          (tc (send (send (send self :detect-table-center) :copy-worldcoords)
+                    :translate (float-vector 0 0 150) :world)))
+      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :x)
+      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :y)
+      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :z)
       (setq av0
             (send *baxter* arm_
+                  tc
                   :inverse-kinematics
-                  (send (send (send self :detect-table-center) :copy-worldcoords)
-                        :translate (float-vector 0 0 230) :world)
-                  :use-gripper t)
+                  :use-gripper t
+                  :thre 200 :rthre (/ 2pi 36)
+                  )
             )
       (unless av0 (return-from :place-object-on-table))
       (send *ri* :angle-vector av0 3000)
@@ -289,7 +295,19 @@
   (:collect-data-for-an-object
     ()
     (ros::ros-info-blue "[~a] Collecting data for an object" (ros::get-name))
-    (dotimes (_ 4)
+    (dotimes (_ 9)
+      ;; Check mutex before picking object
+      (let ((last-logging-time (ros::time 0)))
+        (while
+          (ros::get-param "/in_hand_data_collection/mutex" nil)
+          (if (> (- (send (ros::time-now) :to-sec) (send last-logging-time :to-sec)) 30)
+            (ros::ros-info-green "Waiting for opposite arm. /in_hand_data_collection/mutex is True.")
+            (setq last-logging-time (ros::time-now))
+            )
+          (unix::sleep 1)
+          )
+        )
+      (ros::set-param "/in_hand_data_collection/mutex" t)  ;; Lock mutex
       ;; Pick object from table
       (while
         (null (send self :pick-object-from-table))
@@ -313,7 +331,7 @@
         )
       (send self :send-save-request)
       ;; View hand randomly
-      (dotimes (_ 4)
+      (dotimes (_ 36)
         ;; View hand pose
         (while
           (not (send self :go-view-hand-pose :random t))
@@ -326,6 +344,7 @@
           )
         (send self :send-save-request)
         )
+      (ros::set-param "/in_hand_data_collection/mutex" nil)  ;; Free mutex
       (while
         (null (send self :place-object-on-table))
         (ros::ros-warn "[~a] Failed to place object on table. Retrying.." (ros::get-name))
