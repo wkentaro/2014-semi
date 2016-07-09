@@ -284,8 +284,8 @@
       (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :z)
       (setq av0
             (send *baxter* arm_
-                  tc
                   :inverse-kinematics
+                  tc
                   :use-gripper t
                   :thre 200 :rthre (/ 2pi 36)
                   )
