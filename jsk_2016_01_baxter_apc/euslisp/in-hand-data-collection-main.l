@@ -356,6 +356,7 @@
         ;; View hand pose
         (while
           (not (send self :go-view-hand-pose :random t))
+          (send self :go-view-hand-pose :random nil)  ;; reset if failed
           (unix::usleep (* 50 1000)))
         (send self :set-param-hand-pose)
         ;; Send saving request
