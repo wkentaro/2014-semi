@@ -316,6 +316,8 @@
       (let ((last-logging-time (ros::time 0)))
         (while
           (ros::get-param "/in_hand_data_collection/mutex" nil)
+          (send *ri* :angle-vector-sequence (list (send *baxter* :fold-pose-back arm_)) :fast nil 0 :scale 3.0)
+          (send *ri* :wait-interpolation)
           (when (> (- (send (ros::time-now) :to-sec) (send last-logging-time :to-sec)) 30)
             (ros::ros-info-green "[~a] Waiting for opposite arm. /in_hand_data_collection/mutex is True." (ros::get-name))
             (setq last-logging-time (ros::time-now))
