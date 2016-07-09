@@ -289,13 +289,14 @@
     ()
     (ros::ros-info-blue "[~a] Placing object on table" (ros::get-name))
     (send *ri* :gripper-servo-on arm_)
-    (let ((av0)
+    (let ((av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
+          (av1)
           (tc (send (send (send self :detect-table-center) :copy-worldcoords)
                     :translate (float-vector 0 0 150) :world)))
       (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :x)
       (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :y)
       (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :z)
-      (setq av0
+      (setq av1
             (send *baxter* arm_
                   :inverse-kinematics
                   tc
@@ -303,8 +304,8 @@
                   :thre 200 :rthre (/ 2pi 36)
                   )
             )
-      (unless av0 (return-from :place-object-on-table))
-      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 3.0)
+      (unless av1 (return-from :place-object-on-table))
+      (send *ri* :angle-vector-sequence (list av0 av1) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
