@@ -294,9 +294,9 @@
           (av1)
           (tc (send (send (send self :detect-table-center) :copy-worldcoords)
                     :translate (float-vector 0 0 150) :world)))
-      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :x)
-      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :y)
-      (send tc :rotate (* (- (random 6) 6) (/ 2pi 36)) :z)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
       (setq av1
             (send *baxter* arm_
                   :inverse-kinematics
