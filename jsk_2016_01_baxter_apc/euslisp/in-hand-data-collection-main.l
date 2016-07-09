@@ -92,6 +92,7 @@
       (when
         (or
           (> (norm (v- (send tc :worldpos) (send mt :worldpos))) 500)  ;; far from view point
+          (< (send *baxter* :left_s0 :joint-angle) -45)  ;; to avoid collision with kinect2
           (< (norm (v- (send base->kinect2 :worldpos) (send mt :worldpos))) 800)  ;; too close to camera
           )
         (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis nil)
@@ -129,6 +130,9 @@
                                           ))
                   :debug-view nil
                   )
+            )
+          (when (< (send *baxter* :left_s0 :joint-angle) -45)  ;; to avoid collision with kinect2
+            (setq av nil)
             )
           )
         )
