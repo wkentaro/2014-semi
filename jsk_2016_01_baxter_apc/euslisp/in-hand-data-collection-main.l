@@ -87,10 +87,20 @@
     (let* ((camera-frame "kinect2_torso_rgb_optical_frame")
            (base->kinect2 (send (*ri* . _tfl) :lookup-transform "base" camera-frame (ros::time 0)))
            (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 800)))
+           (mt (send *baxter* arm_ :end-coords))
            (av))
       (when
-        (> (norm (v- (send tc :worldpos) (send *baxter* arm_ :end-coords :worldpos))) 500)  ;; far from view point
-        (setq av (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis :z :thre 200 :rthre (deg2rad 60)))
+        (or
+          (> (norm (v- (send tc :worldpos) (send mt :worldpos))) 500)  ;; far from view point
+          (< (norm (v- (send base->kinect2 :worldpos) (send mt :worldpos))) 800)  ;; too close to camera
+          )
+        (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis nil)
+        (setq av
+              (send *baxter* arm_ :inverse-kinematics tc
+                    :use-gripper t
+                    :rotation-axis :z
+                    :thre 200 :rthre (deg2rad 60))
+              )
         )
       (when
         random
