@@ -20,9 +20,10 @@
 
   <!-- main -->
   <group if="$(arg launch_main)">
+    <param name="/in_hand_data_collection/mutex" value="false" />
     <node name="in_hand_data_collection_left_main"
           pkg="jsk_2016_01_baxter_apc" type="in-hand-data-collection-main.l"
-          output="screen">
+          output="screen" clear_params="true">
       <rosparam subst_value="true">
         arm: left
         grasping_log_filename: $(env HOME)/.ros/jsk_2016_01_baxter_apc/grasping_log_left.csv
@@ -50,7 +51,7 @@
     </node>
     <node name="in_hand_data_collection_right_main"
           pkg="jsk_2016_01_baxter_apc" type="in-hand-data-collection-main.l"
-          output="screen">
+          output="screen" clear_params="true">
       <rosparam subst_value="true">
         arm: right
         grasping_log_filename: $(env HOME)/.ros/jsk_2016_01_baxter_apc/grasping_log_right.csv
