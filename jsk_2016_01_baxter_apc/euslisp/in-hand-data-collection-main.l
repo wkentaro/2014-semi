@@ -93,6 +93,7 @@
         (or
           (> (norm (v- (send tc :worldpos) (send mt :worldpos))) 500)  ;; far from view point
           (< (send *baxter* :left_s0 :joint-angle) -50)  ;; to avoid collision with kinect2
+          (> (send *baxter* :right_s0 :joint-angle) 50)  ;; to avoid collision with kinect2
           (< (norm (v- (send base->kinect2 :worldpos) (send mt :worldpos))) 650)  ;; too close to camera
           )
         (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis nil)
@@ -137,6 +138,7 @@
         (or
           (> (norm (v- (send tc :worldpos) (send mt :worldpos))) 500)  ;; far from view point
           (< (send *baxter* :left_s0 :joint-angle) -50)  ;; to avoid collision with kinect2
+          (> (send *baxter* :right_s0 :joint-angle) 50)  ;; to avoid collision with kinect2
           (< (norm (v- (send base->kinect2 :worldpos) (send mt :worldpos))) 650)  ;; too close to camera
           )
         (ros::ros-warn "[~a] Set IK result as fail because of some conditions specified in view hand pose"
