@@ -43,6 +43,7 @@
   <run_depend>rosserial_python</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>jsk_data</run_depend>
+  <run_depend>jsk_rviz_plugins</run_depend>
 
   <test_depend>python-gdown</test_depend>
   <test_depend>rostest</test_depend>
