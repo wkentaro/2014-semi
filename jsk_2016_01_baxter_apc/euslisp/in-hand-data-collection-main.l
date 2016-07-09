@@ -18,20 +18,6 @@
                           (float-vector (send p :x) (send p :y) (send p :z)))
                       (send polygon-msg :polygon :points))) :centroid))
 
-(defmethod jsk_2016_01_baxter_apc::baxter-robot
-  (:ik-prepared-poses
-    ()
-    (list
-      :reset-pose
-      :untuck-pose
-      :fold-pose-back
-      :fold-pose-upper
-      :fold-pose-middle
-      :fold-pose-lower
-      )
-    )
-  )
-
 ;; ------------------------------------------------------------------------------------------------
 ;; collector class
 ;; ------------------------------------------------------------------------------------------------
@@ -100,10 +86,15 @@
     (&key (random nil))
     (let* ((camera-frame "kinect2_torso_rgb_optical_frame")
            (base->kinect2 (send (*ri* . _tfl) :lookup-transform "base" camera-frame (ros::time 0)))
-           (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 650)))
+           (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 800)))
            (av))
-      (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :centroid-thre 20 :thre 200 :rthre (deg2rad 40)))
-      (when random
+      (if (or
+            (not random)
+            (> (norm (v- (send tc :worldpos) (send *baxter* arm_ :end-coords :worldpos))) 500)  ;; far from view point
+            )
+        (progn
+          (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :thre 200 :rthre (deg2rad 60)))
+          )
         (let* ((kinect2->base (send base->kinect2 :inverse-transformation))
                (kinect2->end
                  (send (send kinect2->base :copy-worldcoords)
