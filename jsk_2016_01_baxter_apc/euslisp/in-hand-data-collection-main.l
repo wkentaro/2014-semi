@@ -126,7 +126,7 @@
         )
       (if av
         (progn
-          (send *ri* :angle-vector av 3000)
+          (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 6.0)
           (send *ri* :wait-interpolation)
           )
         (return-from :go-view-hand-pose nil)
@@ -152,12 +152,13 @@
             :revert-if-fail nil)
       )
     (send *ri* :gripper-servo-on arm_)
-    (send *ri* :angle-vector (send *baxter* :angle-vector) 3000)
+    (send *ri* :angle-vector-sequence (list (send *baxter* :angle-vector)) :fast nil 0 :scale 2.5)
     (send *ri* :wait-interpolation)
     )
   (:detect-object-on-table
     ()
     (send self :move-arm-to-view-table)
+    (unix::sleep 1)
     (let* ((msg) (frame_id) (pose))
       (setq msg (one-shot-subscribe
                   (format nil
@@ -188,7 +189,7 @@
                      :use-gripper t
                      :rotation-axis nil))
       (unless av0 (return-from :pick-object-from-table))
-      (send *ri* :angle-vector av0 3000)
+      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       (setq av1
             (send *baxter* arm_ :inverse-kinematics
@@ -197,21 +198,21 @@
                   :use-gripper t
                   :rotation-axis :z))
       (unless av1 (return-from :pick-object-from-table))
-      (send *ri* :angle-vector av1 3000)
+      (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 4.0)
       (send *ri* :wait-interpolation)
       (send *ri* :start-grasp arm_)
       (unix::sleep 2)
       (send *ri* :gripper-servo-off arm_)
       (unix::sleep 1)
-      (send *ri* :angle-vector av0 3000)
+      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 4.0)
       (send *ri* :wait-interpolation)
       )
     (if (send *ri* :graspingp arm_)
       (progn
         ; (send self :write-grasping-log :success t)
-        (send *ri* :angle-vector
-              (send *baxter* :fold-to-keep-object arm_)
-              3000)
+        (send *ri* :angle-vector-sequence
+              (list (send *baxter* :fold-to-keep-object arm_))
+              :fast nil 0 :scale 6.0)
         (send *ri* :wait-interpolation)
         (send *ri* :gripper-servo-on arm_)
         t)
@@ -279,7 +280,7 @@
                   )
             )
       (unless av0 (return-from :place-object-on-table))
-      (send *ri* :angle-vector av0 3000)
+      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 4.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
@@ -384,7 +385,9 @@
     (send *ri* :gripper-servo-on arm_)
     (send *baxter* :fold-pose-back arm_)
     (send *baxter* :rotate-gripper arm_ 90 :relative nil)
-    (send *ri* :angle-vector (send *baxter* :angle-vector) 5000)
+    (send *ri* :angle-vector-sequence
+          (list (send *baxter* :angle-vector))
+          :fast nil 0 :scale 6.0)
     (send *ri* :wait-interpolation)
     (send *ri* :calib-pressure-threshold arm_)
     (while
@@ -394,9 +397,9 @@
       ;; Collect
       (send self :collect-data-for-an-object)
       ;; Prepare for next object
-      (send *ri* :angle-vector
-            (send *baxter* :fold-pose-back arm_)
-            5000)
+      (send *ri* :angle-vector-sequence
+            (list (send *baxter* :fold-pose-back arm_))
+            :fast nil 0 :scale 6.0)
       (send *ri* :wait-interpolation)
       (incf object-id_)
       )
