@@ -337,7 +337,7 @@
         )
       (send self :send-save-request)
       ;; View hand randomly
-      (dotimes (_ 36)
+      (dotimes (_ 9)
         ;; View hand pose
         (while
           (not (send self :go-view-hand-pose :random t))
