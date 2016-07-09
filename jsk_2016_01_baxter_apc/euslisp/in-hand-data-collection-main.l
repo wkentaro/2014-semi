@@ -88,13 +88,12 @@
            (base->kinect2 (send (*ri* . _tfl) :lookup-transform "base" camera-frame (ros::time 0)))
            (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 800)))
            (av))
-      (if (or
-            (not random)
-            (> (norm (v- (send tc :worldpos) (send *baxter* arm_ :end-coords :worldpos))) 500)  ;; far from view point
-            )
-        (progn
-          (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :thre 200 :rthre (deg2rad 60)))
-          )
+      (when
+        (> (norm (v- (send tc :worldpos) (send *baxter* arm_ :end-coords :worldpos))) 500)  ;; far from view point
+        (setq av (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis :z :thre 200 :rthre (deg2rad 60)))
+        )
+      (when
+        random
         (let* ((kinect2->base (send base->kinect2 :inverse-transformation))
                (kinect2->end
                  (send (send kinect2->base :copy-worldcoords)
@@ -129,7 +128,10 @@
           (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 6.0)
           (send *ri* :wait-interpolation)
           )
-        (return-from :go-view-hand-pose nil)
+        (progn
+          (ros::ros-warn "[~a] Failed IK for view-hand-pose. random: ~a" (ros::get-name) random)
+          (return-from :go-view-hand-pose nil)
+          )
         )
       )
     (unix::sleep 1)
