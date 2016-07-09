@@ -58,6 +58,7 @@
             to: /in_hand_clipper/right_hand/point_indices
           - from: ~input/image
             to: $(arg INPUT_IMAGE)
+        <!--
         - name: closing_left_hand
           type: jsk_perception/Closing
           remappings:
@@ -68,20 +69,31 @@
           remappings:
           - from: ~input
             to: /pi_to_mask_right_hand/output
+        -->
+        - name: bounding_object_mask_left_hand
+          type: jsk_perception/BoundingObjectMaskImage
+          remappings:
+          - from: ~input
+            to: /pi_to_mask_left_hand/output
+        - name: bounding_object_mask_right_hand
+          type: jsk_perception/BoundingObjectMaskImage
+          remappings:
+          - from: ~input
+            to: /pi_to_mask_right_hand/output
         - name: apply_mask_left_hand
           type: jsk_perception/ApplyMaskImage
           remappings:
           - from: ~input
             to: $(arg INPUT_IMAGE)
           - from: ~input/mask
-            to: /closing_left_hand/output
+            to: /bounding_object_mask_left_hand/output
         - name: apply_mask_right_hand
           type: jsk_perception/ApplyMaskImage
           remappings:
           - from: ~input
             to: $(arg INPUT_IMAGE)
           - from: ~input/mask
-            to: /closing_right_hand/output
+            to: /bounding_object_mask_right_hand/output
     </rosparam>
   </group>
   <group ns="in_hand_clipper">
