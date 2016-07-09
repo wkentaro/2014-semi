@@ -108,7 +108,6 @@
                (kinect2->end
                  (send (send kinect2->base :copy-worldcoords)
                        :transform (send *baxter* arm_ :end-coords :worldcoords)))
-               (mt (send *baxter* arm_ :end-coords))
                (tc))
           (setq tc (send kinect2->end :copy-worldcoords))
           (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
@@ -135,7 +134,7 @@
         )
       (if av
         (progn
-          (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 6.0)
+          (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 3.0)
           (send *ri* :wait-interpolation)
           )
         (progn
@@ -164,7 +163,7 @@
             :revert-if-fail nil)
       )
     (send *ri* :gripper-servo-on arm_)
-    (send *ri* :angle-vector-sequence (list (send *baxter* :angle-vector)) :fast nil 0 :scale 2.5)
+    (send *ri* :angle-vector-sequence (list (send *baxter* :angle-vector)) :fast nil 0 :scale 3.0)
     (send *ri* :wait-interpolation)
     )
   (:detect-object-on-table
@@ -210,13 +209,13 @@
                   :use-gripper t
                   :rotation-axis :z))
       (unless av1 (return-from :pick-object-from-table))
-      (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 4.0)
+      (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       (send *ri* :start-grasp arm_)
       (unix::sleep 2)
       (send *ri* :gripper-servo-off arm_)
       (unix::sleep 1)
-      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 4.0)
+      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (if (send *ri* :graspingp arm_)
@@ -224,7 +223,7 @@
         ; (send self :write-grasping-log :success t)
         (send *ri* :angle-vector-sequence
               (list (send *baxter* :fold-to-keep-object arm_))
-              :fast nil 0 :scale 6.0)
+              :fast nil 0 :scale 3.0)
         (send *ri* :wait-interpolation)
         (send *ri* :gripper-servo-on arm_)
         t)
@@ -292,7 +291,7 @@
                   )
             )
       (unless av0 (return-from :place-object-on-table))
-      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 4.0)
+      (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
@@ -319,17 +318,18 @@
         (null (send self :pick-object-from-table))
         (ros::ros-warn "[~a] Failed to pick object from table. Retrying.." (ros::get-name))
         (unix::sleep 3)
-         )
+        )
       (ros::set-dynparam
         (format nil "data_collection_server_~a" (arm-to-str arm_))
         (list
           (cons "save_dir"
                 (format nil "~a/.ros/jsk_2016_01_baxter_apc/in_hand_data_collection/~a_attempt" (unix::getenv "HOME") (send (ros::time-now) :to-nsec)))))
-      (unix::sleep 2)
+      (unix::sleep 1)
       ;; View hand in a static position at first
       (while
         (not (send self :go-view-hand-pose :random nil))
         (unix::usleep (* 50 1000)))
+      (unix::sleep 1)
       (send self :set-param-hand-pose)
       (if (send *ri* :graspingp arm_)
         (ros::set-param "~object_label" (elt object-list_ object-id_))
@@ -374,6 +374,7 @@
     )
   (:set-param-hand-pose
     ()
+    (send *baxter* :angle-vector (send *ri* :state :potentio-vector))  ;; update *baxter*
     (let* ((camera-frame "kinect2_torso_rgb_optical_frame")
            (end-coords
              (send
@@ -411,7 +412,7 @@
       ;; Prepare for next object
       (send *ri* :angle-vector-sequence
             (list (send *baxter* :fold-pose-back arm_))
-            :fast nil 0 :scale 6.0)
+            :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       (incf object-id_)
       )
