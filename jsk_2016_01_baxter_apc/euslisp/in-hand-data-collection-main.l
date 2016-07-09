@@ -68,7 +68,9 @@
     (setq object-id_ 0)
     (setq object-pos_ (float-vector 750 -798 -180))
     ;; Wait for other nodes
+    (ros::wait-for-service "/rviz/yes_no_button")
     (ros::wait-for-service (format nil "~a_image_publisher/set_parameters" (arm-to-str arm_)))
+    (ros::wait-for-service (format nil "data_collection_server_~a/save_request" (arm-to-str arm_)))
     )
   (:wait-for-user-input
     ()
@@ -76,7 +78,7 @@
     (let (yes)
       (while
         (not yes)
-        (setq yes (send (ros::service-call "rqt_yn_btn" (instance jsk_rqt_plugins::YesNoRequest)) :yes))
+        (setq yes (send (ros::service-call "/rviz/yes_no_button" (instance jsk_gui_msgs::YesNoRequest)) :yes))
         )
       )
     )
@@ -300,7 +302,7 @@
       (let ((last-logging-time (ros::time 0)))
         (while
           (ros::get-param "/in_hand_data_collection/mutex" nil)
-          (if (> (- (send (ros::time-now) :to-sec) (send last-logging-time :to-sec)) 30)
+          (when (> (- (send (ros::time-now) :to-sec) (send last-logging-time :to-sec)) 30)
             (ros::ros-info-green "Waiting for opposite arm. /in_hand_data_collection/mutex is True.")
             (setq last-logging-time (ros::time-now))
             )

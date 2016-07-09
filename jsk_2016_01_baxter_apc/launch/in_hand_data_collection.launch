@@ -92,9 +92,6 @@
       file_name: $(find jsk_apc2016_common)/models/jane_eyre_dvd/image.jpg
     </rosparam>
   </node>
-  <node name="rqt_yn_btn"
-        pkg="jsk_rqt_plugins" type="rqt_yn_btn">
-  </node>
   <node name="image_rotate"
         pkg="image_rotate" type="image_rotate">
     <remap from="image" to="/kinect2_torso/hd/image_color" />
