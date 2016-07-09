@@ -1550,11 +1550,11 @@
       target-bin))
   )
 
-(defun jsk_2016_01_baxter_apc::baxter-init (&key (ctype :default-controller))
+(defun jsk_2016_01_baxter_apc::baxter-init (&key (ctype :default-controller) (check-self-collision nil))
   (unless (boundp '*ri*)
     (setq *ri* (instance jsk_2016_01_baxter_apc::baxter-interface :init :type ctype)))
   (unless (boundp '*baxter*)
-    (setq *baxter* (instance jsk_2016_01_baxter_apc::baxter-robot :init)))
+    (setq *baxter* (instance jsk_2016_01_baxter_apc::baxter-robot :init :check-self-collision check-self-collision)))
   (send *baxter* :angle-vector (send *ri* :state :potentio-vector))
   (send *ri* :calib-grasp :arms)
   )

@@ -11,8 +11,32 @@
   :slots (_view-hand-pos))
 (defmethod jsk_2016_01_baxter_apc::baxter-robot
   (:init
-    (&rest args)
+    (&key (check-self-collision nil) &rest args)
     (send-super* :init args)
+    (when check-self-collision
+      (setq collision-avoidance-links
+            (list (send self :screen_lk)
+                  (send self :larm :wrist-r :child-link)
+                  (send self :larm :elbow-p :child-link)
+                  (send self :larm :elbow-r :child-link)
+                  (send self :rarm :wrist-r :child-link)
+                  (send self :rarm :elbow-p :child-link)
+                  (send self :rarm :elbow-r :child-link)
+                  ))
+      (setq larm-collision-avoidance-links collision-avoidance-links)
+      (setq rarm-collision-avoidance-links collision-avoidance-links)
+      (send (send self :left_w2) :max-joint-velocity 1)
+      (send (send self :left_w1) :max-joint-velocity 2)
+      (send (send self :left_w0) :max-joint-velocity 2.5)
+      (send (send self :left_e0) :max-joint-velocity 1)
+      (send (send self :left_s0) :max-joint-velocity 1.4)
+
+      (send (send self :right_w2) :max-joint-velocity 1)
+      (send (send self :right_w1) :max-joint-velocity 2)
+      (send (send self :right_w0) :max-joint-velocity 2.5)
+      (send (send self :right_e0) :max-joint-velocity 1)
+      (send (send self :right_s0) :max-joint-velocity 1.4)
+      )
     ;; initialize _view-hand-pos
     (setq _view-hand-pos (make-hash-table))
     (sethash :rarm _view-hand-pos (make-hash-table))
@@ -37,6 +61,9 @@
     (sethash :l (gethash :rarm _view-hand-pos) #f(811.875 -180 156.184))
     ;; pos of :c, :f, :i, :l is not symmetrical to :a, :d, :g, :j because torso can't see
     )
+  (:self-collision-check
+    (&key (pairs (send self :collision-check-pairs :links collision-avoidance-links)) &rest args &allow-other-keys)
+    (send-super* :self-collision-check :pairs pairs args))
   (:inverse-kinematics
     (target-coords
       &rest args
