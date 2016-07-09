@@ -303,7 +303,7 @@
         (while
           (ros::get-param "/in_hand_data_collection/mutex" nil)
           (when (> (- (send (ros::time-now) :to-sec) (send last-logging-time :to-sec)) 30)
-            (ros::ros-info-green "Waiting for opposite arm. /in_hand_data_collection/mutex is True.")
+            (ros::ros-info-green "[~a] Waiting for opposite arm. /in_hand_data_collection/mutex is True." (ros::get-name))
             (setq last-logging-time (ros::time-now))
             )
           (unix::sleep 1)
