@@ -18,6 +18,19 @@
                           (float-vector (send p :x) (send p :y) (send p :z)))
                       (send polygon-msg :polygon :points))) :centroid))
 
+(defmethod jsk_2016_01_baxter_apc::baxter-robot
+  (:ik-prepared-poses
+    ()
+    (list
+      :reset-pose
+      :untuck-pose
+      :fold-pose-back
+      :fold-pose-upper
+      :fold-pose-middle
+      :fold-pose-lower
+      )
+    )
+  )
 
 ;; ------------------------------------------------------------------------------------------------
 ;; collector class
@@ -43,8 +56,8 @@
       (setq arm_ :rarm))
     (setq object-list_ (ros::get-param "~object_list"))
     (if (eq arm_ :larm)
-      (jsk_2016_01_baxter_apc::baxter-init :ctype :larm-controller)
-      (jsk_2016_01_baxter_apc::baxter-init :ctype :rarm-controller))
+      (jsk_2016_01_baxter_apc::baxter-init :ctype :larm-controller :check-self-collision t)
+      (jsk_2016_01_baxter_apc::baxter-init :ctype :rarm-controller :check-self-collision t))
     ;; Initialize grasping log file
     ; (setq grasping-log-filename_ (pathname (ros::get-param "~grasping_log_filename")))
     ; (with-open-file
@@ -53,9 +66,6 @@
     (setq *robot* *baxter*)
     ;; Set slots
     (setq object-id_ 0)
-    (if (eq arm_ :larm)
-      (setq bin-list_ '(:a :d :g :j))
-      (setq bin-list_ '(:c :f :i :l)))
     (setq object-pos_ (float-vector 750 -798 -180))
     ;; Wait for other nodes
     (ros::wait-for-service (format nil "~a_image_publisher/set_parameters" (arm-to-str arm_)))
@@ -84,14 +94,51 @@
         )
       )
     )
-  (:view-hand-pose
-    (&key (pos :random))
-    (if (eq pos :random)
-      (send *baxter* :view-hand-pose arm_ (elt bin-list_ (random (length bin-list_))))
-      (send *baxter* :view-hand-pose arm_ pos)
+  (:go-view-hand-pose
+    (&key (random nil))
+    (let* ((camera-frame "kinect2_torso_rgb_optical_frame")
+           (base->kinect2 (send (*ri* . _tfl) :lookup-transform "base" camera-frame (ros::time 0)))
+           (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 500)))
+           (av))
+      (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :centroid-thre 20 :thre 500 :rthre (deg2rad 20)))
+      (when random
+        (let* ((kinect2->base (send base->kinect2 :inverse-transformation))
+               (kinect2->end
+                 (send (send kinect2->base :copy-worldcoords)
+                       :transform (send *baxter* arm_ :end-coords :worldcoords)))
+               (mt (send *baxter* arm_ :end-coords))
+               (tc))
+          (setq tc (send kinect2->end :copy-worldcoords))
+          (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
+          (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
+          (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
+          (setq tc (send (send base->kinect2 :copy-worldcoords) :transform tc))
+          (setq av
+            (send *baxter* arm_ :inverse-kinematics
+                  tc
+                  ;; fit the rotation
+                  ; :use-gripper t :translation-axis :xy :thre 200 :rthre (deg2rad 60)
+                  :use-gripper t :rotation-axis t :translation-axis t
+                  :thre 500 :rthre (/ 2pi 36)
+                  ;; second task with null-space, fit the position
+                  :additional-check #'(lambda ()
+                                        (and
+                                          (> 1 (norm (send mt :difference-position tc)))
+                                          (> (deg2rad 1) (norm (send mt :difference-rotation tc)))
+                                          ))
+                  :debug-view nil
+                  )
+            )
+          )
+        )
       )
-    (send *ri* :angle-vector (send *baxter* :angle-vector) 3000)
-    (send *ri* :wait-interpolation)
+    (if av
+      (progn
+        (send *ri* :angle-vector av 3000)
+        (send *ri* :wait-interpolation)
+        )
+      (return-from :go-view-hand-pose nil)
+      )
     (unix::sleep 1)
     )
   (:move-arm-to-view-table
@@ -256,21 +303,21 @@
                 (format nil "~a/.ros/jsk_2016_01_baxter_apc/in_hand_data_collection/~a_attempt" (unix::getenv "HOME") (send (ros::time-now) :to-nsec)))))
       (unix::sleep 2)
       ;; View hand in a static position at first
-      (if (eq arm_ :larm)
-        (send self :view-hand-pose :pos :g)
-        (send self :view-hand-pose :pos :i)
-        )
+      (while
+        (not (send self :go-view-hand-pose :random nil))
+        (unix::usleep (* 50 1000)))
       (send self :set-param-hand-pose)
       (if (send *ri* :graspingp arm_)
         (ros::set-param "~object_label" (elt object-list_ object-id_))
         (ros::set-param "~object_label" "no_object")
         )
       (send self :send-save-request)
-      ;; View hand randomly (optimally in future)
-      ;; TODO(wkentaro): view hand optimally here with ML
+      ;; View hand randomly
       (dotimes (_ 4)
         ;; View hand pose
-        (send self :view-hand-pose)
+        (while
+          (not (send self :go-view-hand-pose :random t))
+          (unix::usleep (* 50 1000)))
         (send self :set-param-hand-pose)
         ;; Send saving request
         (if (send *ri* :graspingp arm_)
