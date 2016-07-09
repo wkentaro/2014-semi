@@ -48,16 +48,12 @@
           - from: ~input
             <!-- to: /pc_to_pi_left_hand/output -->
             to: /in_hand_clipper/left_hand/point_indices
-          - from: ~input/image
-            to: $(arg INPUT_IMAGE)
         - name: pi_to_mask_right_hand
           type: jsk_pcl/PointIndicesToMaskImage
           remappings:
           - from: ~input
             <!-- to: /pc_to_pi_right_hand/output -->
             to: /in_hand_clipper/right_hand/point_indices
-          - from: ~input/image
-            to: $(arg INPUT_IMAGE)
         <!--
         - name: closing_left_hand
           type: jsk_perception/Closing
@@ -124,12 +120,16 @@
   <!-- convert point indices to mask image -->
   <group ns="pi_to_mask_left_hand">
     <rosparam>
-      queue_size: 1000
+      static_image_size: true
+      width: 1920
+      height: 1080
     </rosparam>
   </group>
   <group ns="pi_to_mask_right_hand">
     <rosparam>
-      queue_size: 1000
+      static_image_size: true
+      width: 1920
+      height: 1080
     </rosparam>
   </group>
 
