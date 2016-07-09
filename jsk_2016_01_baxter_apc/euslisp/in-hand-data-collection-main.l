@@ -96,6 +96,7 @@
           (> (send *baxter* :right_s0 :joint-angle) 50)  ;; to avoid collision with kinect2
           (< (norm (v- (send base->kinect2 :worldpos) (send mt :worldpos))) 650)  ;; too close to camera
           )
+        (send *baxter* :untuck-pose arm_)
         (send *baxter* arm_ :inverse-kinematics tc :use-gripper t :rotation-axis nil)
         (setq av
               (send *baxter* arm_ :inverse-kinematics tc
