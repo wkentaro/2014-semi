@@ -102,7 +102,7 @@
            (base->kinect2 (send (*ri* . _tfl) :lookup-transform "base" camera-frame (ros::time 0)))
            (tc (send (send base->kinect2 :copy-worldcoords) :translate (float-vector 0 0 650)))
            (av))
-      (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :centroid-thre 20 :thre 50 :rthre (deg2rad 20)))
+      (setq av (send *baxter* arm_ :inverse-kinematics tc :rotation-axis :z :centroid-thre 20 :thre 200 :rthre (deg2rad 40)))
       (when random
         (let* ((kinect2->base (send base->kinect2 :inverse-transformation))
                (kinect2->end
