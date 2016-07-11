@@ -294,11 +294,9 @@
     (send *ri* :gripper-servo-on arm_)
     (let ((av0)
           (av1)
+          (av2)
           (tc (make-coords :pos (v+ (send (send self :detect-table-center) :worldpos) (float-vector 0 0 300)))))
       (setq av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
-      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
-      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
-      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
       (setq av1
             (send *baxter* arm_
                   :inverse-kinematics
@@ -308,7 +306,19 @@
                   )
             )
       (unless av1 (return-from :place-object-on-table))
-      (send *ri* :angle-vector-sequence (list av0 av1) :fast nil 0 :scale 3.0)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
+      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
+      (setq av2
+            (send *baxter* arm_
+                  :inverse-kinematics
+                  tc
+                  :use-gripper t
+                  :rotation-axis :z
+                  )
+            )
+      (unless av2 (return-from :place-object-on-table))
+      (send *ri* :angle-vector-sequence (list av0 av1 av2) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
