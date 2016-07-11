@@ -58,6 +58,10 @@
         pkg="nodelet" type="nodelet"
         args="load jsk_pcl/EuclideanClustering $(arg MANAGER)">
     <remap from="~input" to="plane_extraction_$(arg HAND)_hand_camera/output" />
+    <rosparam>
+      min_size: 20
+      max_size: 100000
+    </rosparam>
   </node>
 
   <node name="cpi_decomposer_$(arg HAND)_table"
