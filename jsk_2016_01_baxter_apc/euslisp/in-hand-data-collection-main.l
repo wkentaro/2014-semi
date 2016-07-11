@@ -293,7 +293,7 @@
     (let ((av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
           (av1)
           (tc (send (send (send self :detect-table-center) :copy-worldcoords)
-                    :translate (float-vector 0 0 150) :world)))
+                    :translate (float-vector 0 0 300) :world)))
       (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
       (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
       (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
@@ -302,7 +302,7 @@
                   :inverse-kinematics
                   tc
                   :use-gripper t
-                  :thre 200 :rthre (/ 2pi 36)
+                  :thre 100 :rthre (/ 2pi 36)
                   )
             )
       (unless av1 (return-from :place-object-on-table))
