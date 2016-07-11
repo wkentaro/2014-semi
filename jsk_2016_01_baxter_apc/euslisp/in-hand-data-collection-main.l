@@ -322,6 +322,7 @@
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
+    (send *ri* :spin-off-by-wrist arm_ :times 15)
     (unix::sleep 5)
     )
   (:collect-data-for-an-object
