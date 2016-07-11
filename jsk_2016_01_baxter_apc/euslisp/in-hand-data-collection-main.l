@@ -187,18 +187,18 @@
     (let* ((msg) (frame_id) (pose))
       (setq msg (one-shot-subscribe
                   (format nil
-                          "cpi_decomposer_~a_table/centroid_pose_array"
+                          "cpi_decomposer_~a_table/boxes"
                           (arm-to-str arm_))
-                  geometry_msgs::PoseArray
+                  jsk_recognition_msgs::BoundingBoxArray
                   :after-stamp (ros::time-now)))
-      (if (or (null msg) (null (send msg :poses)))
+      (if (or (null msg) (null (send msg :boxes)))
         (progn
           (ros::ros-warn "[~a] No object is found on table. Retrying.." (ros::get-name))
           (send self :detect-object-on-table)
           )
         (progn
           (setq frame_id (send msg :header :frame_id))
-          (setq pose (elt (send msg :poses) 0))
+          (setq pose (send (elt (send msg :boxes) 0) :pose))
           (make-coords
             :pos (send (send *ri* :tf-pose->coords frame_id pose) :worldpos))))
       ))
@@ -219,7 +219,7 @@
       (setq av1
             (send *baxter* arm_ :inverse-kinematics
                   (send (send centroid :copy-worldcoords)
-                        :translate (float-vector 10 0 -50) :world)
+                        :translate (float-vector 0 0 -50) :world)
                   :use-gripper t
                   :rotation-axis :z
                   :rthre (deg2rad 30)))
