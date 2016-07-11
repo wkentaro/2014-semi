@@ -221,7 +221,8 @@
                   (send (send centroid :copy-worldcoords)
                         :translate (float-vector 0 0 -50) :world)
                   :use-gripper t
-                  :rotation-axis :z))
+                  :rotation-axis :z
+                  :rthre (deg2rad 30)))
       (unless av1 (return-from :pick-object-from-table))
       (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
