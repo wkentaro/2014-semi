@@ -219,7 +219,7 @@
       (setq av1
             (send *baxter* arm_ :inverse-kinematics
                   (send (send centroid :copy-worldcoords)
-                        :translate (float-vector 0 0 -50) :world)
+                        :translate (float-vector 10 0 -50) :world)
                   :use-gripper t
                   :rotation-axis :z
                   :rthre (deg2rad 30)))
