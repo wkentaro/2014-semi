@@ -1453,7 +1453,7 @@
           (let ((pressure (send (one-shot-subscribe topic std_msgs::Float64) :data)))
             (when (or (null min-pressure) (< pressure min-pressure)) (setq min-pressure pressure))
             )
-          (unix::usleep (* 500 1000))
+          (unix::sleep 1)
           )
         (sethash hashkey _hard-coded-variables (- min-pressure 12))
         )
