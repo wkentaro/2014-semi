@@ -528,6 +528,30 @@ Visualization Manager:
       left: 185
       top: 15
       width: 128
+    - Class: jsk_rviz_plugin/BoundingBoxArray
+      Enabled: true
+      Name: RightTableObject
+      Topic: /cpi_decomposer_right_table/boxes
+      Unreliable: false
+      Value: true
+      alpha: 0.8
+      color: 25; 255; 0
+      coloring: Auto
+      line width: 0.005
+      only edge: false
+      show coords: false
+    - Class: jsk_rviz_plugin/BoundingBoxArray
+      Enabled: true
+      Name: LeftTableObject
+      Topic: /cpi_decomposer_left_table/boxes
+      Unreliable: false
+      Value: true
+      alpha: 0.8
+      color: 25; 255; 0
+      coloring: Auto
+      line width: 0.005
+      only edge: false
+      show coords: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -565,10 +589,10 @@ Visualization Manager:
         Z: -0.0898671
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.800398
+      Pitch: 0.685398
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.61358
+      Yaw: 1.87858
     Saved: ~
 Window Geometry:
   Displays:
