@@ -232,6 +232,7 @@
       (send *ri* :angle-vector-sequence (list av0) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
+    (unix::sleep 1)
     (if (send *ri* :graspingp arm_)
       (progn
         ; (send self :write-grasping-log :success t)
@@ -292,6 +293,7 @@
     (send *ri* :gripper-servo-on arm_)
     (let ((av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
           (av1)
+          (av2)
           (tc (send (send (send self :detect-table-center) :copy-worldcoords)
                     :translate (float-vector 0 0 300) :world)))
       (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
@@ -302,11 +304,20 @@
                   :inverse-kinematics
                   tc
                   :use-gripper t
-                  :thre 100 :rthre (/ 2pi 36)
+                  :rotation-axis nil
                   )
             )
       (unless av1 (return-from :place-object-on-table))
-      (send *ri* :angle-vector-sequence (list av0 av1) :fast nil 0 :scale 3.0)
+      (setq av2
+            (send *baxter* arm_
+                  :inverse-kinematics
+                  tc
+                  :use-gripper t
+                  :thre 100 :rthre (/ 2pi 36)
+                  )
+            )
+      (unless av2 (return-from :place-object-on-table))
+      (send *ri* :angle-vector-sequence (list av0 av1 av2) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
@@ -361,6 +372,7 @@
           (send self :go-view-hand-pose :random nil)  ;; reset if failed
           (unix::usleep (* 50 1000)))
         (send self :set-param-hand-pose)
+        (unix::sleep 1)
         ;; Send saving request
         (if (send *ri* :graspingp arm_)
           (ros::set-param "~object_label" (elt object-list_ object-id_))
