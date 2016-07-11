@@ -148,7 +148,7 @@
         )
       (if av
         (progn
-          (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 3.0)
+          (send *ri* :angle-vector-sequence (list av) :fast nil 0 :scale 5.0)
           (send *ri* :wait-interpolation)
           )
         (progn
@@ -224,7 +224,7 @@
                   :rotation-axis :z
                   :rthre (deg2rad 30)))
       (unless av1 (return-from :pick-object-from-table))
-      (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 3.0)
+      (send *ri* :angle-vector-sequence (list av1) :fast nil 0 :scale 5.0)
       (send *ri* :wait-interpolation)
       (send *ri* :start-grasp arm_)
       (unix::sleep 2)
@@ -292,33 +292,23 @@
     ()
     (ros::ros-info-blue "[~a] Placing object on table" (ros::get-name))
     (send *ri* :gripper-servo-on arm_)
-    (let ((av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
+    (let ((av0)
           (av1)
-          (av2)
-          (tc (send (send (send self :detect-table-center) :copy-worldcoords)
-                    :translate (float-vector 0 0 300) :world)))
-      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
-      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
-      (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
+          (tc (make-coords :pos (v+ (send (send self :detect-table-center) :worldpos) (float-vector 0 0 300)))))
+      (setq av0 (send *baxter* :rotate-gripper arm_ 0 :relative nil))
+      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :x)
+      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :y)
+      ; (send tc :rotate (* (- (random 6) 3) (/ 2pi 36)) :z)
       (setq av1
             (send *baxter* arm_
                   :inverse-kinematics
                   tc
                   :use-gripper t
-                  :rotation-axis nil
+                  :rotation-axis :z
                   )
             )
       (unless av1 (return-from :place-object-on-table))
-      (setq av2
-            (send *baxter* arm_
-                  :inverse-kinematics
-                  tc
-                  :use-gripper t
-                  :thre 100 :rthre (/ 2pi 36)
-                  )
-            )
-      (unless av2 (return-from :place-object-on-table))
-      (send *ri* :angle-vector-sequence (list av0 av1 av2) :fast nil 0 :scale 3.0)
+      (send *ri* :angle-vector-sequence (list av0 av1) :fast nil 0 :scale 3.0)
       (send *ri* :wait-interpolation)
       )
     (send *ri* :stop-grasp arm_)
@@ -380,12 +370,16 @@
           (ros::set-param "~object_label" "no_object")
           )
         (send self :send-save-request)
+        (unless (send *ri* :graspingp arm_) (return)) ;; stop view hand data collection
         )
       (ros::set-param "/in_hand_data_collection/mutex" nil)  ;; Free mutex
-      (while
-        (null (send self :place-object-on-table))
-        (ros::ros-warn "[~a] Failed to place object on table. Retrying.." (ros::get-name))
-        (unix::sleep 1)
+      (if (send *ri* :graspingp arm_)
+        (while
+          (null (send self :place-object-on-table))
+          (ros::ros-warn "[~a] Failed to place object on table. Retrying.." (ros::get-name))
+          (unix::sleep 1)
+          )
+        (send *ri* :stop-grasp arm_)
         )
       )
     )
