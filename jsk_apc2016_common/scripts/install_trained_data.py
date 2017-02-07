@@ -20,11 +20,17 @@ def main():
         md5='58a0e819ba141a34b1d68cc5e972615b',
     )
 
+    # download_data(
+    #     pkg_name=PKG,
+    #     path='trained_data/fcn32s_6000.chainermodel',
+    #     url='https://drive.google.com/uc?id=0B9P1L--7Wd2vd0JUMFZKeVQxaG8',
+    #     md5='d063161d18129946f6c2878afb5f9067',
+    # )
     download_data(
         pkg_name=PKG,
-        path='trained_data/fcn32s_6000.chainermodel',
-        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vd0JUMFZKeVQxaG8',
-        md5='d063161d18129946f6c2878afb5f9067',
+        path='trained_data/fcn32s_v2_148000.chainermodel',
+        url='https://drive.google.com/uc?id=0B9P1L--7Wd2vWHRGSnd4Q0ljTHc',
+        md5='0B9P1L--7Wd2vd0JUMFZKeVQxaG8',
     )
     download_data(
         pkg_name=PKG,
