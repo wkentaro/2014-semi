@@ -41,6 +41,6 @@
         args="0.040 0.01 0 0.0 0 0 right_hand_camera_depth_optical_frame right_hand_camera_rgb_optical_frame 20" />
   <node name="right_hand_camera_depth_static_tf_publisher"
         pkg="tf" type="static_transform_publisher"
-        args="-0.12 0.02 0.010 -1.56 0.04 -0.08 right_hand right_hand_camera_depth_optical_frame 20" />
+        args="-0.1 0.02 0.030 -1.53 0.04 -0.08 right_hand right_hand_camera_depth_optical_frame 20" />
 
 </launch>
