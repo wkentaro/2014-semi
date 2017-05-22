@@ -70,7 +70,7 @@
     (sethash :offset-gripper-bin-top hard-coded-variables- 10)
     (sethash :offset-gripper-bin-side hard-coded-variables- 40)
     (sethash :draw-out-from-bin-l hard-coded-variables- 100)
-    (sethash :default-overlook-angle hard-coded-variables- (/ pi 4.5))
+    (sethash :default-overlook-angle hard-coded-variables- (/ pi 18))
     (sethash :default-overlook-offset hard-coded-variables- (make-hash-table))
     (dolist (bin (list :a :b :c :d :e :f :g :h :i :j :k :l))
       (sethash bin (gethash :default-overlook-offset hard-coded-variables-)
@@ -911,8 +911,8 @@
               (setf (elt (send end->above :pos) 2) 0)
               (setq target-above-coords
                     (send end-coords :transform end->above :local))
-              ;; change gripper-angle to 45 not to push target object
-              (send *baxter* :rotate-gripper arm 45 :relative nil)
+              ;; change gripper-angle to 0 not to push target object
+              (send *baxter* :rotate-gripper arm 0 :relative nil)
               (send self :angle-vector (send *baxter* :angle-vector) 1000)
               (send *ri* :wait-interpolation)
               (send *baxter* :rotate-gripper arm 90 :relative nil)
@@ -920,7 +920,7 @@
               (if (send *baxter* arm :inverse-kinematics target-above-coords
                         :revert-if-fail t)
                 (progn
-                  (send *baxter* :rotate-gripper arm 45 :relative nil)
+                  (send *baxter* :rotate-gripper arm 0 :relative nil)
                   (send self :angle-vector (send *baxter* :angle-vector)
                         (setq elapsed-t 2500))
                   (send self :wait-interpolation)

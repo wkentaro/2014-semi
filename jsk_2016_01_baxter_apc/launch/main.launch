@@ -77,14 +77,14 @@
   -->
 
   <!-- robot main -->
-  <node if="$(arg launch_main)" pkg="jsk_2016_01_baxter_apc" type="main.l" name="left_hand"
-        args="&quot;(progn (apc-init :larm-controller) (apc-mainloop :larm))&quot;"
-        respawn="true" output="screen">
-    <env name="DISPLAY" value="" />
-    <rosparam subst_value="true">
-      collect_data: $(arg collect_data)
-    </rosparam>
-  </node>
+  <!-- <node if="$(arg launch_main)" pkg="jsk_2016_01_baxter_apc" type="main.l" name="left_hand" -->
+  <!--       args="&#38;quot;(progn (apc&#45;init :larm&#45;controller) (apc&#45;mainloop :larm))&#38;quot;" -->
+  <!--       respawn="true" output="screen"> -->
+  <!--   <env name="DISPLAY" value="" /> -->
+  <!--   <rosparam subst_value="true"> -->
+  <!--     collect_data: $(arg collect_data) -->
+  <!--   </rosparam> -->
+  <!-- </node> -->
   <node if="$(arg launch_main)" pkg="jsk_2016_01_baxter_apc" type="main.l" name="right_hand"
     args="&quot;(progn (apc-init :rarm-controller) (apc-mainloop :rarm))&quot;"
     respawn="true" output="screen">
