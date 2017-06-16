@@ -123,20 +123,20 @@
             (setq box-list (cdr box-list))))
         (ros::ros-fatal "[:recognize-bin-boxes] cannot recognize bin boxes"))))
   (:recognize-tote-boxes
-    (arm &key (stamp (ros::time-now)))
-    (let ((box-topic (format nil "~a_hand_camera/attention_clipper_tote/output/box_array"
-                             (arm2str arm)))
-                     box-msg bbox)
+    (&key (stamp (ros::time-now)))
+    (let ((box-topic (format nil "publish_tote_boxes/output"))
+                     box-msg box-list)
       (setq box-msg (one-shot-subscribe box-topic
                                         jsk_recognition_msgs::BoundingBoxArray
                                         :timeout 10000
                                         :after-stamp stamp))
       (if box-msg
         (progn
-          (ros::ros-info "[:recognize-tote-boxes] arm: ~a Recognize tote bbox" (arm2str arm))
-          (setq bbox (car (send box-msg :boxes)))
-          (sethash arm tote-cubes- (send self :bbox->cube bbox)))
-        (ros::ros-fatal "[:recognize-tote-boxes] arm: ~a Cannot find tote bbox" (arm2str arm)))))
+          (ros::ros-info "[~a] [:recognize-tote-boxes] recognize tote bbox" (ros::get-name))
+          (setq bbox-list (send box-msg :boxes))
+          (dolist (arm '(:larm :rarm))
+            (sethash arm tote-cubes- (send self :bbox->cube (pop bbox-list)))))
+        (ros::ros-fatal "[:recognize-tote-boxes] cannot recognize tote bbox"))))
   (:visualize-bins ()
     (ros::ros-warn ":visualize-bins was deprecated. Please use :visualize-boxes.")
     (send self :visualize-boxes :box-type :bin))
@@ -331,13 +331,13 @@
     (let (bin-cube bin-coords)
       (setq bin-cube (gethash bin bin-cubes-))
       (setq bin-coords (send bin-cube :copy-worldcoords))
-      (send bin-coords :rotate (aref rpy 0) :z)
-      (send bin-coords :rotate (aref rpy 1) :y)
-      (send bin-coords :rotate (aref rpy 2) :x)
       (send bin-coords :translate
             (v+ (float-vector
                   0.0 0.0 (/ (z-of-cube bin-cube) 2.0))
                 offset) :local)
+      (send bin-coords :rotate (aref rpy 0) :z)
+      (send bin-coords :rotate (aref rpy 1) :y)
+      (send bin-coords :rotate (aref rpy 2) :x)
       (send *baxter* arm :inverse-kinematics bin-coords
             :rotation-axis rotation-axis
             :use-gripper use-gripper)))
@@ -357,13 +357,13 @@
     (let (tote-cube tote-coords)
       (setq tote-cube (gethash arm tote-cubes-))
       (setq tote-coords (send tote-cube :copy-worldcoords))
-      (send tote-coords :rotate (aref rpy 0) :z)
-      (send tote-coords :rotate (aref rpy 1) :y)
-      (send tote-coords :rotate (aref rpy 2) :x)
       (send tote-coords :translate
             (v+ (float-vector
                   0.0 0.0 (/ (z-of-cube tote-cube) 2.0))
                 offset) :local)
+      (send tote-coords :rotate (aref rpy 0) :z)
+      (send tote-coords :rotate (aref rpy 1) :y)
+      (send tote-coords :rotate (aref rpy 2) :x)
       (send *baxter* arm :inverse-kinematics tote-coords
             :rotation-axis rotation-axis
             :use-gripper use-gripper)))
@@ -375,9 +375,9 @@
       (send *baxter* :reset-pose arm)
       (send *baxter* :rotate-gripper arm gripper-angle :relative nil)
       (setq offset
-            (cond ((eq bin :a) (float-vector 0 offset-y 250))
-                  ((eq bin :b) (float-vector 0 offset-y 200))
-                  ((eq bin :c) (float-vector 0 offset-y 200))))
+            (cond ((eq bin :a) (float-vector -100 offset-y 250))
+                  ((eq bin :b) (float-vector -200 offset-y 200))
+                  ((eq bin :c) (float-vector -150 offset-y 200))))
       (setq rpy
             (float-vector 0 pi/2 (if (eq arm :larm) pi/2 -pi/2)))
       (pushback
