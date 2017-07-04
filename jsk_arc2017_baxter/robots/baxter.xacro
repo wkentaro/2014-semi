@@ -12,4 +12,16 @@
   <xacro:include filename="$(find jsk_arc2017_baxter)/robots/right_vacuum_gripper.xacro"/>
   <xacro:include filename="$(find jsk_2016_01_baxter_apc)/robots/left_vacuum_gripper.xacro"/>
 
+  <link name="right_hand_camera_depth_optical_frame"/>
+  <joint name="right_hand_camera_depth_optical_frame_joint" type="fixed">
+    <origin rpy="0.00 -0.05 1.63" xyz="-0.06 -0.10 0.01"/>
+    <parent link="right_hand_camera"/>
+    <child link="right_hand_camera_depth_optical_frame"/>
+  </joint>
+  <link name="right_hand_camera_rgb_optical_frame"/>
+  <joint name="right_hand_camera_rgb_optical_frame_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.025 0 0"/>
+    <parent link="right_hand_camera_depth_optical_frame"/>
+    <child link="right_hand_camera_rgb_optical_frame"/>
+  </joint>
 </robot>
