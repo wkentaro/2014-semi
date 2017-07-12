@@ -31,7 +31,7 @@
       <arg name="camera" value="left_hand_camera" />
       <arg name="rgb_frame_id" value="left_hand_camera_rgb_optical_frame" />
       <arg name="depth_frame_id" value="left_hand_camera_depth_optical_frame" />
-      <arg name="device_id" value="$(arg l_hand_r_camera_device_id)" />
+      <arg name="device_id" value="$(arg l_hand_l_camera_device_id)" />
       <arg name="publish_tf" value="false" />
       <arg name="depth_registration" value="$(arg depth_registration)" />
       <arg name="rgb_camera_info_url" value="file://$(find jsk_arc2017_baxter)/data/camera_info/stereo_rgb_$(arg l_hand_stereo_devices)_right.yaml" />
