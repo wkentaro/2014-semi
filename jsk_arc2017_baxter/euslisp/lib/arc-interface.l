@@ -19,6 +19,7 @@
           cardboard-cubes-
           finished-objects-
           object-boxes-
+          object-pboxes-
           object-coords-
           orders-
           postponed-objects-
@@ -39,6 +40,7 @@
     (dolist (bin (list :a :b :c))
       (sethash bin bin-object-volumes- 0))
     (setq object-boxes- (make-hash-table))
+    (setq object-pboxes- (make-hash-table))
     (setq object-coords- (make-hash-table))
     (setq cardboard-cubes- (make-hash-table))
     (setq tote-cubes- (make-hash-table))
@@ -339,9 +341,11 @@
     (arm &key (stamp (ros::time-now)) (timeout 10))
     (let ((box-topic (format nil "~a_hand_camera/cluster_indices_decomposer_target/boxes" (arm2str arm)))
           box-msg
+          (pbox-topic (format nil "~a_hand_camera/place/cluster_indices_decomposer_target/boxes" (arm2str arm)))
+          pbox-msg
           (com-topic (format nil "~a_hand_camera/cluster_indices_decomposer_target/centroid_pose_array"
                         (arm2str arm)))
-          com-msg obj-box obj-coords is-recognized)
+          com-msg obj-box obj-pbox obj-coords is-recognized)
       (when (ros::get-param "~data_collection" nil)
         (ros::ros-info-green "Requesting data collection for shelf-bin/tote.")
         (let ((res (ros::service-call (format nil "~a_hand_camera/data_collection_server/save_request" (arm2str arm))
@@ -355,20 +359,27 @@
                           (let ((st (send msg :header :stamp)))
                             (when (> (send st :to-sec) (send stamp :to-sec))
                               (setq box-msg msg)))))
+      (ros::subscribe pbox-topic jsk_recognition_msgs::BoundingBoxArray
+                      #'(lambda (msg)
+                          (let ((st (send msg :header :stamp)))
+                            (when (> (send st :to-sec) (send stamp :to-sec))
+                              (setq pbox-msg msg)))))
       (ros::subscribe com-topic geometry_msgs::PoseArray
                       #'(lambda (msg)
                           (let ((st (send msg :header :stamp)))
                             (when (> (send st :to-sec) (send stamp :to-sec))
                               (setq com-msg msg)))))
-      (while (and (not (and box-msg com-msg))
+      (while (and (not (and box-msg pbox-msg com-msg))
                   (> (+ (send stamp :to-sec) timeout) (send (ros::time-now) :to-sec)))
              (unix::usleep (* 50 1000))
              (ros::spin-once))
       (ros::unsubscribe box-topic)
+      (ros::unsubscribe pbox-topic)
       (ros::unsubscribe com-topic)
       (cond
-        ((and box-msg com-msg)
+        ((and box-msg pbox-msg com-msg)
          (ros::ros-info "[:recognize-target-object] arm: ~a get cpi msg" arm)
+         (setq obj-pbox (send pbox-msg :boxes))
          (setq obj-box (send box-msg :boxes))
          (setq obj-coords
                (mapcar #'(lambda (obj-pose)
@@ -378,6 +389,7 @@
          (if (and (> (length obj-box) 0) (> (length obj-coords) 0))
            (progn
              (sethash arm object-boxes- obj-box)
+             (sethash arm object-pboxes- obj-pbox)
              (sethash arm object-coords- obj-coords)
              (setq is-recognized (send box-msg :header :stamp)))
            (progn
