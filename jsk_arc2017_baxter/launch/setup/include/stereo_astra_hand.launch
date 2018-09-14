@@ -325,10 +325,10 @@
           object_x: 0.1
           object_y: 0.1
           object_z: 0.1
-          initial_x: -0.016
-          initial_y: -0.086
-          initial_z: -0.013
-          initial_orientation: [0.006, -0.012, 0.731, 0.682]
+          initial_x: -0.074
+          initial_y: -0.062
+          initial_z: 0.012
+          initial_orientation: [0.032, -0.008, 0.720, 0.693]
         </rosparam>
         <rosparam if="$(arg pick)">
           object_type: cube

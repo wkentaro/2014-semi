@@ -164,8 +164,8 @@
       (setq recognize-fail-count- 0)
       (when moveit-p- (send self :delete-tote-scene arm))
       (if (eq grasp-style- :suction)
-        (send self :set-movable-region-for-tote arm :offset (list 50 50 0))
-        (send self :set-movable-region-for-tote arm :offset (list 50 50 0)))
+        (send self :set-movable-region-for-tote arm :offset (list 40 40 0))
+        (send self :set-movable-region-for-tote arm :offset (list 40 40 0)))
       (when use-scale (send self :reset-scale arm))
       (when move-head (send *baxter* :head_pan :joint-angle (if (eq arm :larm) -70 70)))
       (setq pick-result
